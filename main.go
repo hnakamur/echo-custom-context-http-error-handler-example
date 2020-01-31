@@ -19,7 +19,9 @@ func (c *CustomContext) Foo() {
 }
 
 func (c *CustomContext) Error(err error) {
+	log.Printf("CustomContext.Error, c=%p, c.Context=%p", c, c.Context)
 	c.Context.Echo().HTTPErrorHandler(err, c)
+	// c.Context.Error(err)
 }
 
 func main() {
@@ -36,6 +38,7 @@ func run() error {
 		return func(c echo.Context) error {
 			cc := &CustomContext{c}
 			err := next(cc)
+			log.Printf("middleware cc=%p, c=%p", cc, c)
 			if err != nil {
 				cc.Error(err)
 			}
@@ -58,6 +61,7 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 	if c.Response().Committed {
 		return
 	}
+	log.Printf("customHTTPErrorHandler c=%p", c)
 	code := http.StatusInternalServerError
 	if he, ok := err.(*echo.HTTPError); ok {
 		code = he.Code
